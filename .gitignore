@@ -1,0 +1,13 @@
+build/
+dist/
+.cache/
+compile_commands.json
+*.o
+*.d
+.claude/settings.local.json
+__pycache__
+.env
+editor.env
+.clangd
+CMakeUserPresets.json
+.venv/

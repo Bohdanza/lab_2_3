@@ -1,3 +1,0 @@
-D:/uni/lab_2_3/lab_2_3/out/build/Debug/_deps/sfml-subbuild/CMakeFiles/sfml-populate.dir
-D:/uni/lab_2_3/lab_2_3/out/build/Debug/_deps/sfml-subbuild/CMakeFiles/edit_cache.dir
-D:/uni/lab_2_3/lab_2_3/out/build/Debug/_deps/sfml-subbuild/CMakeFiles/rebuild_cache.dir
