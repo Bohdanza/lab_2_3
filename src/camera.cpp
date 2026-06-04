@@ -52,43 +52,57 @@ void Camera::LookAt(const Point& target, const Point& up)
     SetOrientation(target - v_position, up);
 }
 
+namespace
+{
+    // Re-orthonormalise the basis from forward and up using Gram-Schmidt,
+    // matching SetOrientation's conventions (right = up x forward) but keeping
+    // the camera's *current* up rather than snapping back to world up. This is
+    // what lets the camera roll through the poles and rotate freely.
+    void ReorthonormalizeBasis(Point& right, Point& up, Point& forward)
+    {
+        forward.Normalize();
+        right = up.Cross(forward);
+        right.Normalize();
+        up = forward.Cross(right);
+        up.Normalize();
+    }
+}
+
 void Camera::Rotate(float yawRadians, float pitchRadians)
 {
-    const Point worldUp(0, 1, 0);
+    // Yaw and pitch about the camera's own up and right axes. Because the basis
+    // turns with the view (no world-up reference), there are no poles to clamp
+    // against and the camera can rotate freely through any angle.
+    v_forward = RotateAroundAxis(v_forward, v_up, yawRadians);
+    v_right   = RotateAroundAxis(v_right, v_up, yawRadians);
 
-    // Pitch about the camera's right axis, but reject the step if it would tip
-    // the view too close to straight up/down (where the up reference degrades).
-    Point pitched = RotateAroundAxis(v_forward, v_right, pitchRadians);
-    Point pn = pitched;
-    pn.Normalize();
-    Point forward = (std::abs(pn.Dot(worldUp)) < 0.99f) ? pitched : v_forward;
+    v_forward = RotateAroundAxis(v_forward, v_right, pitchRadians);
+    v_up      = RotateAroundAxis(v_up, v_right, pitchRadians);
 
-    // Yaw about the world up axis so the horizon stays level.
-    forward = RotateAroundAxis(forward, worldUp, yawRadians);
-
-    SetOrientation(forward, worldUp);
+    ReorthonormalizeBasis(v_right, v_up, v_forward);
 }
 
 void Camera::Orbit(const Point& pivot, float yawRadians, float pitchRadians)
 {
-    const Point worldUp(0, 1, 0);
-
     // Vector from the pivot out to the camera; rotating it moves the camera
     // around the pivot while the pivot itself stays put.
     Point offset = v_position - pivot;
 
-    // Pitch about the camera's right axis, rejecting steps that tip the orbit
-    // too close to the poles (where the up reference degrades).
-    Point pitched = RotateAroundAxis(offset, v_right, pitchRadians);
-    Point dir = pitched;
-    dir.Normalize();
-    Point newOffset = (std::abs(dir.Dot(worldUp)) < 0.99f) ? pitched : offset;
+    // Rotate the offset and the whole basis together about the camera's own up
+    // (yaw) and right (pitch) axes. Rotating in the camera's local frame means
+    // there is no world-up singularity, so the orbit is free in every direction.
+    Point yawAxis = v_up;
+    offset    = RotateAroundAxis(offset, yawAxis, yawRadians);
+    v_forward = RotateAroundAxis(v_forward, yawAxis, yawRadians);
+    v_right   = RotateAroundAxis(v_right, yawAxis, yawRadians);
 
-    // Yaw about the world up axis.
-    newOffset = RotateAroundAxis(newOffset, worldUp, yawRadians);
+    Point pitchAxis = v_right;
+    offset    = RotateAroundAxis(offset, pitchAxis, pitchRadians);
+    v_forward = RotateAroundAxis(v_forward, pitchAxis, pitchRadians);
+    v_up      = RotateAroundAxis(v_up, pitchAxis, pitchRadians);
 
-    v_position = pivot + newOffset;
-    LookAt(pivot, worldUp);
+    v_position = pivot + offset;
+    ReorthonormalizeBasis(v_right, v_up, v_forward);
 }
 
 std::optional<sf::Vector2f> Camera::WorldToScreen(const Point& world) const

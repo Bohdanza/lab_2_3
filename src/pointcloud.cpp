@@ -14,6 +14,10 @@ namespace
 }
 
 PointCloud::PointCloud(std::size_t pointCount, const Point& dimensions, unsigned seed, float pointRadius)
+    // The grid's X axis starts along world X; its length is the longest side of
+    // the parallelepiped. Origin is fixed up to the centroid once points exist.
+    : v_grid(Point(1, 0, 0),
+             std::max({dimensions.X(), dimensions.Y(), dimensions.Z()}))
 {
     std::mt19937 generator(seed);
 
@@ -27,10 +31,11 @@ PointCloud::PointCloud(std::size_t pointCount, const Point& dimensions, unsigned
         v_points.emplace_back(Point(distX(generator), distY(generator), distZ(generator)),
                               sf::Color::White, pointRadius);
 
+    v_grid.SetOrigin(Centroid());
     Recolor();
 }
 
-PointCloud::PointCloud(const PointCloud& other) : v_points(other.v_points)
+PointCloud::PointCloud(const PointCloud& other) : v_points(other.v_points), v_grid(other.v_grid)
 {
 }
 
@@ -110,6 +115,11 @@ void PointCloud::Rotate(const Point& axis, float angleRadians)
         vp.SetPoint(rotated + c);
     }
 
+    // Keep the grid aligned with the cloud: its axes turn by the same rotation
+    // while its origin stays pinned to the (rotation-invariant) centroid.
+    v_grid.Rotate(k, angleRadians);
+    v_grid.SetOrigin(c);
+
     // Rotation preserves distances, so the crowding colours stay valid.
 }
 
@@ -159,6 +169,8 @@ void PointCloud::ScaleAlongAxis(const Point& axis, float factor)
 
 void PointCloud::Draw(sf::RenderTarget& target, const Camera& camera) const
 {
+    v_grid.Draw(target, camera);
+
     for (const VisualPoint& vp : v_points)
         vp.Draw(target, camera);
 }

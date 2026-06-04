@@ -54,14 +54,14 @@ class Camera
         // Orient the camera so it faces target from the current position.
         void LookAt(const Point& target, const Point& up = Point(0, 1, 0));
 
-        // Mouse-look: yaw about the world up axis and pitch about the camera's
-        // own right axis, keeping the horizon level (no roll). Pitch is clamped
-        // so the camera never looks straight up or down.
+        // Mouse-look: yaw and pitch about the camera's own up and right axes.
+        // The basis turns with the view, so there is no pole to clamp against
+        // and the camera can rotate freely through any angle.
         void Rotate(float yawRadians, float pitchRadians);
 
-        // Orbit around a pivot: the camera circles the pivot (yaw about world
-        // up, pitch about its right axis) and keeps looking at it, so the pivot
-        // stays fixed at the centre of the view. Pitch is clamped near the poles.
+        // Orbit around a pivot: the camera circles the pivot (yaw and pitch
+        // about its own up and right axes) and keeps looking at it, so the pivot
+        // stays fixed at the centre of the view. Rotation is unconstrained.
         void Orbit(const Point& pivot, float yawRadians, float pitchRadians);
 
         // Project a world point onto the viewport. Returns std::nullopt when the

@@ -2,6 +2,7 @@
 #include <cstddef>
 #include <random>
 #include <vector>
+#include "coordgrid.hpp"
 #include "drawable.hpp"
 #include "point.hpp"
 #include "visualpoint.hpp"
@@ -20,6 +21,11 @@ class PointCloud : public Drawable
 {
     private:
         std::vector<VisualPoint> v_points;
+
+        // A cosmetic coordinate grid drawn at the cloud's centroid. It rotates
+        // together with the cloud (see Rotate) so it always shows the cloud's
+        // current orientation.
+        CoordGrid v_grid;
 
         // Centre of mass of all current points; the origin used by Rotate/Scale.
         Point Centroid() const;
@@ -45,6 +51,7 @@ class PointCloud : public Drawable
 
         std::size_t Size() const { return v_points.size(); }
         const std::vector<VisualPoint>& Points() const { return v_points; }
+        const CoordGrid& Grid() const { return v_grid; }
 
         // Rotate the whole cloud by angleRadians about an axis through its
         // centroid (Rodrigues' rotation; axis need not be normalised).
