@@ -1,0 +1,8 @@
+BasedOnStyle: Microsoft
+IndentWidth: 4
+TabWidth: 4
+ColumnLimit: 125
+NamespaceIndentation: All
+FixNamespaceComments: false
+ContinuationIndentWidth: 4
+UseTab: Never

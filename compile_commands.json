@@ -1,0 +1,8 @@
+[
+{
+  "directory": "D:/uni/lab_2_3/lab_2_3/out/build/Release",
+  "command": "D:\\programs\\msys64\\clangarm64\\bin\\clang++.exe -O3 -DNDEBUG -std=gnu++23 -gcodeview -o CMakeFiles\\lab_2_3.dir\\src\\main.cpp.obj -c D:\\uni\\lab_2_3\\lab_2_3\\src\\main.cpp",
+  "file": "D:/uni/lab_2_3/lab_2_3/src/main.cpp",
+  "output": "D:/uni/lab_2_3/lab_2_3/out/build/Release/CMakeFiles/lab_2_3.dir/src/main.cpp.obj"
+}
+]

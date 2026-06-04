@@ -1,0 +1,3 @@
+D:/uni/lab_2_3/lab_2_3/out/build/Debug/_deps/vorbis-subbuild/CMakeFiles/vorbis-populate.dir
+D:/uni/lab_2_3/lab_2_3/out/build/Debug/_deps/vorbis-subbuild/CMakeFiles/edit_cache.dir
+D:/uni/lab_2_3/lab_2_3/out/build/Debug/_deps/vorbis-subbuild/CMakeFiles/rebuild_cache.dir
