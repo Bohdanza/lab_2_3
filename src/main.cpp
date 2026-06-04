@@ -328,7 +328,7 @@ int main()
     camera.LookAt(Point(0, 0, 0));
 
     // 1000 points normally distributed in a 6x6x6 parallelepiped.
-    Construction construction(PointCloud(1000, Point(6, 6, 6), /*seed=*/42));
+    Construction construction(PointCloud(100, Point(6, 6, 6), /*seed=*/42));
 
     // Right mouse = look around; middle mouse = drag (pan) the view.
     constexpr float rotateSpeed = 0.005f; // radians per pixel of mouse motion
