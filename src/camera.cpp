@@ -7,6 +7,13 @@ namespace
     // The near plane: world points closer than this along the forward axis are
     // treated as being behind the camera.
     constexpr float c_nearPlane = 1e-4f;
+
+    // Rotate v about a (unit-length) axis by angle, using Rodrigues' formula.
+    Point RotateAroundAxis(const Point& v, const Point& axis, float angle)
+    {
+        float c = std::cos(angle), s = std::sin(angle);
+        return v * c + axis.Cross(v) * s + axis * (axis.Dot(v) * (1.0f - c));
+    }
 }
 
 Camera::Camera(const Point& position, const sf::Vector2f& viewport)
@@ -43,6 +50,45 @@ void Camera::SetOrientation(const Point& forward, const Point& up)
 void Camera::LookAt(const Point& target, const Point& up)
 {
     SetOrientation(target - v_position, up);
+}
+
+void Camera::Rotate(float yawRadians, float pitchRadians)
+{
+    const Point worldUp(0, 1, 0);
+
+    // Pitch about the camera's right axis, but reject the step if it would tip
+    // the view too close to straight up/down (where the up reference degrades).
+    Point pitched = RotateAroundAxis(v_forward, v_right, pitchRadians);
+    Point pn = pitched;
+    pn.Normalize();
+    Point forward = (std::abs(pn.Dot(worldUp)) < 0.99f) ? pitched : v_forward;
+
+    // Yaw about the world up axis so the horizon stays level.
+    forward = RotateAroundAxis(forward, worldUp, yawRadians);
+
+    SetOrientation(forward, worldUp);
+}
+
+void Camera::Orbit(const Point& pivot, float yawRadians, float pitchRadians)
+{
+    const Point worldUp(0, 1, 0);
+
+    // Vector from the pivot out to the camera; rotating it moves the camera
+    // around the pivot while the pivot itself stays put.
+    Point offset = v_position - pivot;
+
+    // Pitch about the camera's right axis, rejecting steps that tip the orbit
+    // too close to the poles (where the up reference degrades).
+    Point pitched = RotateAroundAxis(offset, v_right, pitchRadians);
+    Point dir = pitched;
+    dir.Normalize();
+    Point newOffset = (std::abs(dir.Dot(worldUp)) < 0.99f) ? pitched : offset;
+
+    // Yaw about the world up axis.
+    newOffset = RotateAroundAxis(newOffset, worldUp, yawRadians);
+
+    v_position = pivot + newOffset;
+    LookAt(pivot, worldUp);
 }
 
 std::optional<sf::Vector2f> Camera::WorldToScreen(const Point& world) const
