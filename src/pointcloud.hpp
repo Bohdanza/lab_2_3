@@ -1,6 +1,7 @@
 #pragma once
 #include <cstddef>
 #include <random>
+#include <utility>
 #include <vector>
 #include "coordgrid.hpp"
 #include "drawable.hpp"
@@ -64,6 +65,19 @@ class PointCloud : public Drawable
         // Stretch the cloud by factor along an arbitrary axis direction, leaving
         // the perpendicular extent unchanged.
         void ScaleAlongAxis(const Point& axis, float factor);
+
+        // Collapse the cloud onto the plane through its centroid perpendicular to
+        // `normal` (i.e. project every point onto that plane). Equivalent to
+        // scaling by zero along `normal`.
+        void ProjectOntoPlane(const Point& normal) { ScaleAlongAxis(normal, 0.0f); }
+
+        // Collapse the cloud onto the line through its centroid along
+        // `direction` (i.e. keep only the component parallel to `direction`).
+        void ProjectOntoLine(const Point& direction);
+
+        // Brute-force search for the two points that are furthest apart. Returns
+        // their indices into Points(); {0, 0} when fewer than two points exist.
+        std::pair<std::size_t, std::size_t> FurthestPair() const;
 
         void Draw(sf::RenderTarget& target, const Camera& camera) const override;
 };

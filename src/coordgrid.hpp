@@ -18,9 +18,9 @@ class CoordGrid : public Drawable
         // The three axis vectors, each already scaled to the requested length.
         Point v_axisX, v_axisY, v_axisZ;
 
-        sf::Color v_colorX = sf::Color::Red;
-        sf::Color v_colorY = sf::Color::Green;
-        sf::Color v_colorZ = sf::Color(64, 128, 255); // blue
+        sf::Color v_colorX = sf::Color(64, 128, 255);
+        sf::Color v_colorY = sf::Color(64, 128, 255);
+        sf::Color v_colorZ = sf::Color(64, 128, 255);
 
     public:
         // xDirection sets the direction of the X axis (need not be normalised);

@@ -55,13 +55,14 @@ void CoordGrid::Draw(sf::RenderTarget& target, const Camera& camera) const
         {v_axisZ, v_colorZ},
     }};
 
-    std::optional<sf::Vector2f> start = camera.WorldToScreen(v_origin);
-
     for (const auto& [axis, color] : axes)
     {
+        // Draw each axis as a full line through the origin so it extends into
+        // both positive and negative values.
+        std::optional<sf::Vector2f> start = camera.WorldToScreen(v_origin - axis);
         std::optional<sf::Vector2f> end = camera.WorldToScreen(v_origin + axis);
 
-        // Skip an axis whose origin or tip lies behind the camera; clipping a
+        // Skip an axis whose either tip lies behind the camera; clipping a
         // single line segment is not worth the complexity for a cosmetic aid.
         if (!start || !end)
             continue;

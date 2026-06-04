@@ -167,6 +167,45 @@ void PointCloud::ScaleAlongAxis(const Point& axis, float factor)
     Recolor();
 }
 
+void PointCloud::ProjectOntoLine(const Point& direction)
+{
+    Point u = direction;
+    if (u.GetLength() == 0)
+        return;
+    u.Normalize();
+
+    Point c = Centroid();
+
+    for (VisualPoint& vp : v_points)
+    {
+        Point p = vp.GetPoint() - c;
+        Point along = u * p.Dot(u); // component parallel to the line
+        vp.SetPoint(along + c);     // drop everything perpendicular to it
+    }
+
+    Recolor();
+}
+
+std::pair<std::size_t, std::size_t> PointCloud::FurthestPair() const
+{
+    std::pair<std::size_t, std::size_t> best{0, 0};
+    float bestDist = -1.0f;
+
+    // The clouds are small, so an O(n^2) scan over every unordered pair is fine.
+    for (std::size_t i = 0; i < v_points.size(); ++i)
+        for (std::size_t j = i + 1; j < v_points.size(); ++j)
+        {
+            float d = v_points[i].GetPoint().DistanceToPoint(v_points[j].GetPoint());
+            if (d > bestDist)
+            {
+                bestDist = d;
+                best = {i, j};
+            }
+        }
+
+    return best;
+}
+
 void PointCloud::Draw(sf::RenderTarget& target, const Camera& camera) const
 {
     v_grid.Draw(target, camera);
