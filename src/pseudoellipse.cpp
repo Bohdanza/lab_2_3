@@ -54,18 +54,32 @@ void PseudoEllipse::Draw(sf::RenderTarget& target, const Camera& camera) const
     Point az = Deform(Point(0, 0, v_radius));
 
     std::optional<sf::Vector2f> center = camera.WorldToScreen(v_center);
-    std::optional<sf::Vector2f> tipX = camera.WorldToScreen(v_center + ax);
-    std::optional<sf::Vector2f> tipY = camera.WorldToScreen(v_center + ay);
-    std::optional<sf::Vector2f> tipZ = camera.WorldToScreen(v_center + az);
+    if (!center)
+        return; // centre is behind the camera
 
-    // Skip the ellipsoid if any reference point lies behind the camera.
-    if (!center || !tipX || !tipY || !tipZ)
+    // Project the semi-axes with a single perspective scale taken at the centre's
+    // depth (a local orthographic projection), rather than dividing each axis tip
+    // by its own depth. Per-tip perspective division foreshortens the axis that
+    // points towards the camera differently from the others, which warps a sphere
+    // into an ellipse; projecting all three at the same scale keeps a sphere's
+    // silhouette a true circle and an ellipsoid's a faithful ellipse.
+    float depth = (v_center - camera.Position()).Dot(camera.Forward());
+    if (depth <= 1e-4f)
         return;
 
-    // Screen-space images of the three semi-axes.
-    sf::Vector2f u = *tipX - *center;
-    sf::Vector2f v = *tipY - *center;
-    sf::Vector2f w = *tipZ - *center;
+    float halfFov = (Camera::Fov() * 0.5f) * (std::numbers::pi_v<float> / 180.0f);
+    float focal = (camera.Viewport().x * 0.5f) / std::tan(halfFov);
+    float scale = focal / depth;
+
+    // Screen-space images of the three semi-axes. Screen +y points down, so the
+    // up component is negated (matching Camera::WorldToScreen).
+    auto project = [&](const Point& a)
+    {
+        return sf::Vector2f(a.Dot(camera.Right()) * scale, -a.Dot(camera.Up()) * scale);
+    };
+    sf::Vector2f u = project(ax);
+    sf::Vector2f v = project(ay);
+    sf::Vector2f w = project(az);
 
     // Trace the exact silhouette. The ellipsoid is the image of the unit sphere
     // under the 2x3 screen map A = [u v w]; the boundary point whose outward
