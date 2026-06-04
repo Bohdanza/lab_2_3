@@ -35,7 +35,8 @@ PointCloud::PointCloud(std::size_t pointCount, const Point& dimensions, unsigned
     Recolor();
 }
 
-PointCloud::PointCloud(const PointCloud& other) : v_points(other.v_points), v_grid(other.v_grid)
+PointCloud::PointCloud(const PointCloud& other)
+    : v_points(other.v_points), v_grid(other.v_grid), v_drawGrid(other.v_drawGrid)
 {
 }
 
@@ -208,7 +209,8 @@ std::pair<std::size_t, std::size_t> PointCloud::FurthestPair() const
 
 void PointCloud::Draw(sf::RenderTarget& target, const Camera& camera) const
 {
-    v_grid.Draw(target, camera);
+    if (v_drawGrid)
+        v_grid.Draw(target, camera);
 
     for (const VisualPoint& vp : v_points)
         vp.Draw(target, camera);

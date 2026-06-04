@@ -27,9 +27,9 @@ class PointCloud : public Drawable
         // together with the cloud (see Rotate) so it always shows the cloud's
         // current orientation.
         CoordGrid v_grid;
-
-        // Centre of mass of all current points; the origin used by Rotate/Scale.
-        Point Centroid() const;
+        // Whether Draw renders v_grid. Off for the rotated working copy, whose
+        // tilted grid would just clutter the axis-aligned result.
+        bool v_drawGrid = true;
 
         // Recompute every point's colour from the summary distance to its 4
         // closest neighbours. Called after the cloud is built and after any
@@ -53,6 +53,12 @@ class PointCloud : public Drawable
         std::size_t Size() const { return v_points.size(); }
         const std::vector<VisualPoint>& Points() const { return v_points; }
         const CoordGrid& Grid() const { return v_grid; }
+
+        // Show or hide this cloud's own coordinate grid when drawing.
+        void SetDrawGrid(bool drawGrid) { v_drawGrid = drawGrid; }
+
+        // Centre of mass of all current points; the origin used by Rotate/Scale.
+        Point Centroid() const;
 
         // Rotate the whole cloud by angleRadians about an axis through its
         // centroid (Rodrigues' rotation; axis need not be normalised).
